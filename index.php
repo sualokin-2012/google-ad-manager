@@ -9,13 +9,14 @@ require __DIR__ . '/env.php';
 use Google\Cloud\Storage\StorageClient;
 
 $app = array();
-$app['bucket_name'] = "try-phpappeng.appspot.com";
-$app['mysql_user'] = $mysql_user;
-$app['mysql_password'] = $mysql_password;
-$app['mysql_dbname'] = "testdb";
-$app['project_id'] = getenv('GCLOUD_PROJECT');
-
-
+$app['bucket_name'] 	= $bucket_name;
+$app['mysql_host']		= $mysql_host;
+$app['mysql_user'] 		= $mysql_user;
+$app['mysql_password'] 	= $mysql_password;
+$app['mysql_dbname'] 	= $mysql_db;
+$app['mysql_port']		= $mysql_port;
+$app['project_id'] 		= $project_id;
+$app['mysql_db_socket']	= $mysql_db_socket;
 
 /**
  * Upload a file.
@@ -57,16 +58,15 @@ if ($_FILES) {
 	}
 }
 
-
-$servername = null;
-$username = $app['mysql_user'];
-$password = $app['mysql_password'];
-$dbname = $app['mysql_dbname'];
-$dbport = null;
+$host 		= null;
+$username 	= $app['mysql_user'];
+$password	= $app['mysql_password'];
+$dbname 	= $app['mysql_dbname'];
+$dbport 	= null;
+$socket 	= $app['mysql_db_socket'];
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname, 
-	$dbport, "/cloudsql/try-phpappeng:asia-southeast1:testsql");
+$conn = new mysqli($host, $username, $password, $dbname, $dbport, $socket);
 
 // Check connection
 if ($conn->connect_error) {

@@ -5,6 +5,7 @@
   "require": {
     "google/cloud": "^0.72.0",
     "google/cloud-storage": "^1.6",
-    "googleads/googleads-php-lib": "48.0"
+    "googleads/googleads-php-lib": "48.0",
+    "ext-soap": "*"
   }
 }
