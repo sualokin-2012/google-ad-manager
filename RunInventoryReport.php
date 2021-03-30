@@ -37,8 +37,6 @@ use Google\AdsApi\AdManager\v202008\ReportQueryAdUnitView;
 use Google\AdsApi\AdManager\v202008\ServiceFactory;
 use Google\AdsApi\Common\OAuth2TokenBuilder;
 
-require_once('DbConfig.php');
-
 /**
  * This example runs a typical daily inventory report and saves it in your
  * system's temp directory. It filters on the network's root ad unit ID. This is
