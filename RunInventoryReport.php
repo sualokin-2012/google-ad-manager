@@ -52,12 +52,10 @@ class RunInventoryReport
 
     public static function setDBConfig($host, $user, $password, $database)
     {
-        self::$host = $host;
-        self::$user = $user;
+        self::$host     = $host;
+        self::$user     = $user;
         self::$password = $password;
-        self::$database = $database;
-
-        printf("DB Info : %s %s %s %s\n", self::$host, self::$user, self::$password, self::$database);
+        self::$database = $database;       
     }
 
     public static function runExample(
@@ -199,9 +197,9 @@ class RunInventoryReport
             // Remove .gz from file name
             $unzipFile = substr($filePath, 0, -3);
             printf("Unzip file name : %s\n", $unzipFile);
-            self::importCSVToMySQL(($unzipFile));
 
-            //printf("DB Info : %s %s %s %s\n", self::$host, self::$user, self::$password, self::$database);
+            // Save CSV data to MySQL
+            self::importCSVToMySQL(($unzipFile));
             
         } else {
             print "Report failed.\n";

@@ -72,8 +72,8 @@ $conn = new mysqli($host, $username, $password, $dbname, $dbport, $socket);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 } 
-echo "\nConnected successfully\n";
 
+echo "\nConnected successfully\n";
 
 echo "\ntesting gcloud php\n";
 
