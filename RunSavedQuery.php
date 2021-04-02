@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\AdsApi\Examples\AdManager\v202102\ReportService;
+namespace Google\AdsApi\Examples\AdManager\v202008\ReportService;
 
 //require __DIR__ . '/../../../../vendor/autoload.php';
 require __DIR__ . '/vendor/autoload.php';

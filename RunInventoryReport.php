@@ -45,10 +45,22 @@ use Google\AdsApi\Common\OAuth2TokenBuilder;
  */
 class RunInventoryReport
 {    
-    protected static $host = null;
-    protected static $user = null;
-    protected static $password = null;
-    protected static $database = null;
+    protected static $host          = null;
+    protected static $user          = null;
+    protected static $password      = null;
+    protected static $database      = null;
+    protected static $networkCode   = null;
+    protected static $displayName   = null;
+    protected static $reportJobId   = null;
+    protected static $startDate     = null;
+    protected static $endDate       = null;
+
+    function __construct($host, $user, $password, $database) {
+        self::$host     = $host;
+        self::$user     = $user;
+        self::$password = $password;
+        self::$database = $database;        
+    }
 
     public static function setDBConfig($host, $user, $password, $database)
     {
@@ -73,6 +85,9 @@ class RunInventoryReport
             $network->getNetworkCode(),
             $network->getDisplayName()
         );
+        
+        self::$networkCode = $network->getNetworkCode();
+        self::$displayName = $network->getDisplayName();
 
         // Create report query.
         $reportQuery = new ReportQuery();
@@ -132,43 +147,52 @@ class RunInventoryReport
         $reportQuery->setAdUnitView(ReportQueryAdUnitView::HIERARCHICAL);
         // Set the start and end dates or choose a dynamic date range type.
         //$reportQuery->setDateRangeType(DateRangeType::YESTERDAY);
-        $reportQuery->setDateRangeType(DateRangeType::LAST_WEEK);
-        // $reportQuery->setDateRangeType(DateRangeType::CUSTOM_DATE);
-        // $reportQuery->setStartDate(
-        //     AdManagerDateTimes::fromDateTime(
-        //         new DateTime(
-        //             '-7 days',
-        //             new DateTimeZone('America/New_York')
-        //         )
-        //     )
-        //         ->getDate()
-        // );
+        //$reportQuery->setDateRangeType(DateRangeType::LAST_WEEK);
+        $reportQuery->setDateRangeType(DateRangeType::CUSTOM_DATE);
+        $reportQuery->setStartDate(
+            AdManagerDateTimes::fromDateTime(
+                new DateTime(
+                    '-7 days',
+                    new DateTimeZone('America/New_York')
+                )
+            )
+                ->getDate()
+        );
         
-        // printf("Start Date year : %d month : %d day : %d", 
-        // $reportQuery->getStartDate()->getYear(),
-        // $reportQuery->getStartDate()->getMonth(),
-        // $reportQuery->getStartDate()->getDay());
+        printf("Start Date year : %d month : %d day : %d", 
+        $reportQuery->getStartDate()->getYear(),
+        $reportQuery->getStartDate()->getMonth(),
+        $reportQuery->getStartDate()->getDay());
 
-        // $reportQuery->setEndDate(
-        //     AdManagerDateTimes::fromDateTime(
-        //         new DateTime(
-        //             'now',
-        //             new DateTimeZone('America/New_York')
-        //         )
-        //     )
-        //         ->getDate()
-        // );
+        self::$startDate = strval($reportQuery->getStartDate()->getYear())."-".strVal($reportQuery->getStartDate()->getMonth())."-".strVal($reportQuery->getStartDate()->getDay());
 
-        // printf("End Date year : %d month : %d day : %d", 
-        // $reportQuery->getEndDate()->getYear(),
-        // $reportQuery->getEndDate()->getMonth(),
-        // $reportQuery->getEndDate()->getDay());
+        printf("Start Date : %s", self::$startDate);
+
+        $reportQuery->setEndDate(
+            AdManagerDateTimes::fromDateTime(
+                new DateTime(
+                    'now',
+                    new DateTimeZone('America/New_York')
+                )
+            )
+                ->getDate()
+        );
+
+        printf("End Date year : %d month : %d day : %d", 
+        $reportQuery->getEndDate()->getYear(),
+        $reportQuery->getEndDate()->getMonth(),
+        $reportQuery->getEndDate()->getDay());
+
+        self::$endDate = strval($reportQuery->getEndDate()->getYear())."-".strVal($reportQuery->getEndDate()->getMonth())."-".strVal($reportQuery->getEndDate()->getDay());
+
+        printf("End Date : %s", self::$endDate);
 
         // Create report job and start it.
         $reportJob = new ReportJob();
         $reportJob->setReportQuery($reportQuery);
         $reportJob = $reportService->runReportJob($reportJob);
-        printf("report job id : %s", $reportJob->getId());        
+        printf("report job id : %s", $reportJob->getId());
+        self::$reportJobId = $reportJob->getId();
 
         // Create report downloader to poll report's status and download when
         // ready.
@@ -208,6 +232,11 @@ class RunInventoryReport
 
     public static function main()
     {   
+        // Change timeout limit to 300 seconds
+        ini_set('max_execution_time', '300');
+        
+        set_time_limit(300);
+
         $oAuth2Credential = (new OAuth2TokenBuilder())->fromFile()
             ->build();
         $session = (new AdManagerSessionBuilder())->fromFile()
@@ -281,8 +310,8 @@ class RunInventoryReport
             // echo "<pre>";
             // print_r($getData);  
 
-            $sql = "INSERT into reports (`ad_unit_id`, `ad_unit`, `dimension_request_type`, `column_total_code_served_count`, `column_total_line_item_level_impressions`, `column_total_line_item_level_clicks`, `column_total_line_item_level_cpm_and_cpc_revenue`, `column_total_active_view_measurable_impressions`, `column_total_active_view_viewable_impressions`, `column_total_ad_requests`, `column_ad_server_impressions`, `column_ad_server_clicks`, `column_ad_server_cpm_and_cpc_revenue`, `column_adsense_line_item_level_impressions`, `column_adsense_line_item_level_clicks`, `column_adsense_active_view_revenue`, `column_adsense_exchange_active_view_revenue`)
-            VALUES ('".$getData[0]."', '".$getData[1]."','".$getData[2]."','".$getData[3]."','".$getData[4]."','".$getData[5]."','".$getData[6]."','".$getData[7]."','".$getData[8]."','".$getData[9]."','".$getData[10]."','".$getData[11]."','".$getData[12]."','".$getData[13]."','".$getData[14]."','".$getData[15]."','".$getData[16]."')";
+            $sql = "INSERT into reports (`network_code`, `display_name`, `report_job_id`, `start_date`, `end_date`, `ad_unit_id`, `ad_unit`, `dimension_request_type`, `column_total_code_served_count`, `column_total_line_item_level_impressions`, `column_total_line_item_level_clicks`, `column_total_line_item_level_cpm_and_cpc_revenue`, `column_total_active_view_measurable_impressions`, `column_total_active_view_viewable_impressions`, `column_total_ad_requests`, `column_ad_server_impressions`, `column_ad_server_clicks`, `column_ad_server_cpm_and_cpc_revenue`, `column_adsense_line_item_level_impressions`, `column_adsense_line_item_level_clicks`, `column_adsense_active_view_revenue`, `column_adsense_exchange_active_view_revenue`, `current_datetime`)
+            VALUES ('".self::$networkCode."', '".self::$displayName."', '".self::$reportJobId."', '".self::$startDate."', '".self::$endDate."','".$getData[0]."', '".$getData[1]."','".$getData[2]."','".$getData[3]."','".$getData[4]."','".$getData[5]."','".$getData[6]."','".$getData[7]."','".$getData[8]."','".$getData[9]."','".$getData[10]."','".$getData[11]."','".$getData[12]."','".$getData[13]."','".$getData[14]."','".$getData[15]."','".$getData[16]."', now())";
 
             $result = mysqli_query($conn, $sql);
 
@@ -294,14 +323,12 @@ class RunInventoryReport
             {
                 print "CSV File has been successfully Imported.\n";
             }
-              
-            //$id = mysqli_real_escape_string($conn, $getData[0]);
-            //printf($getData[0]);
+
         }
 
         fclose($file);
     }
 }
 
-RunInventoryReport::setDBConfig($mysql_host, $mysql_user, $mysql_password, $mysql_db);
-RunInventoryReport::main();
+//RunInventoryReport::setDBConfig($mysql_host, $mysql_user, $mysql_password, $mysql_db);
+//RunInventoryReport::main();
